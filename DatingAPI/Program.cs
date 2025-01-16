@@ -1,6 +1,7 @@
 using DatingAPI.Data;
 using DatingAPI.Extensions;
 using DatingAPI.Interface;
+using DatingAPI.Middleware;
 using DatingAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionMiddleWare>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
