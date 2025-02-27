@@ -5,7 +5,7 @@
 namespace DatingAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class updatedDatabase : Migration
+    public partial class UserEntityUpdated : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

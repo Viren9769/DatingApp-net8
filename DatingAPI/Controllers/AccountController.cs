@@ -20,7 +20,8 @@ namespace DatingAPI.Controllers
         public async Task<ActionResult<UserDTO>> Register(RegisterDto registerDto)
         {
             if (await UserExists(registerDto.Username)) return BadRequest("UserName is Taken");
-            using var hmac = new HMACSHA512();
+            return Ok();
+           /* using var hmac = new HMACSHA512();
             var user = new appUser
             {
                 userName = registerDto.Username.ToLower(),
@@ -33,14 +34,14 @@ namespace DatingAPI.Controllers
             {
                 Username = user.userName,
                 token = tokenService.CreateToken(user)
-            };
+            };*/
 
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
         {
-            var user = await context.Users.FirstOrDefaultAsync(x => x.userName == loginDTO.Username.ToLower());
+            var user = await context.Users.FirstOrDefaultAsync(x => x.UserName == loginDTO.Username.ToLower());
             if (user == null) return Unauthorized("Invalid username");
 
             using var hmac = new HMACSHA512(user.PasswordSalt);
@@ -51,7 +52,7 @@ namespace DatingAPI.Controllers
             }
             return new UserDTO
             {
-                Username = user.userName,
+                Username = user.UserName,
                 token = tokenService.CreateToken(user)
         };
     }
@@ -60,7 +61,7 @@ namespace DatingAPI.Controllers
 
         private async Task<bool> UserExists(string username)
         {
-            return await context.Users.AnyAsync(x => x.userName.ToLower() == username.ToLower());
+            return await context.Users.AnyAsync(x => x.UserName.ToLower() == username.ToLower());
         }
     }
 }

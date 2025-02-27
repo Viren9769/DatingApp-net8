@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DatingAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250113145245_updatedDatabase")]
-    partial class updatedDatabase
+    [Migration("20250124165145_UserEntityUpdated")]
+    partial class UserEntityUpdated
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,7 +33,7 @@ namespace DatingAPI.Migrations
                         .IsRequired()
                         .HasColumnType("BLOB");
 
-                    b.Property<string>("userName")
+                    b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
