@@ -77,7 +77,22 @@ intializeUplaoder(){
     const updatedMember = {...this.member()}
     updatedMember.photos.push(photo);
     this.memberchange.emit(updatedMember);
+    if(photo.isMain){
+      const user = this.accountservice.currentUser();
+      if(user) {
+        user.photoUrl = photo.url;
+        this.accountservice.setCurrentUser(user);
+      }
+      updatedMember.photoUrl = photo.url;
+    updatedMember.photos.forEach(p => {
+      if(p.isMain) p.isMain = false;
+      if(p.id === photo.id) p.isMain = true;
+    });
+    this.memberchange.emit(updatedMember);
+  }
+
+    }
 
   }
 }
-}
+
