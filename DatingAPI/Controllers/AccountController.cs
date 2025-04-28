@@ -1,4 +1,5 @@
-﻿using DatingAPI.Data;
+﻿using AutoMapper;
+using DatingAPI.Data;
 using DatingAPI.DTOs;
 using DatingAPI.Entities;
 using DatingAPI.Interface;
@@ -13,28 +14,30 @@ using System.Text;
 namespace DatingAPI.Controllers
 {
 
-    public class AccountController(DataContext context, ITokenService tokenService) : BaseApiController
+    public class AccountController(DataContext context, ITokenService tokenService,  IMapper mapper) : BaseApiController
     {
         [HttpPost("register")] //acount register
 
         public async Task<ActionResult<UserDTO>> Register(RegisterDto registerDto)
         {
             if (await UserExists(registerDto.Username)) return BadRequest("UserName is Taken");
-            return Ok();
-           /* using var hmac = new HMACSHA512();
-            var user = new appUser
-            {
-                userName = registerDto.Username.ToLower(),
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSalt = hmac.Key
-            };
+
+            using var hmac = new HMACSHA512();
+            var user = mapper.Map<appUser>(registerDto);
+
+            user.UserName = registerDto.Username.ToLower();
+            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
+            user.PasswordSalt = hmac.Key;
+           
             context.Users.Add(user);
             await context.SaveChangesAsync();
             return new UserDTO
             {
-                Username = user.userName,
-                token = tokenService.CreateToken(user)
-            };*/
+                Username = user.UserName,
+                token = tokenService.CreateToken(user),
+                KnownAs = user.KnownAs,
+                Gender = user.Gender
+            };
 
         }
 
@@ -55,7 +58,9 @@ namespace DatingAPI.Controllers
             return new UserDTO
             {
                 Username = user.UserName,
+                KnownAs = user.KnownAs,
                 token = tokenService.CreateToken(user),
+                Gender = user.Gender,
                 PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
         };
     }

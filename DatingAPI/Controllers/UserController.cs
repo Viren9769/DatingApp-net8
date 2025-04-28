@@ -2,10 +2,11 @@
 using DatingAPI.DTOs;
 using DatingAPI.Entities;
 using DatingAPI.Extensions;
+using DatingAPI.Helpers;
 using DatingAPI.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.EntityFrameworkCore;
 namespace DatingAPI.Controllers;
 
 
@@ -15,10 +16,12 @@ public class UserController(IUserRepository userRepository, IMapper mapper, IPho
     // private readonly DataContext _context = context;
     
     [HttpGet]
-        public async Task<ActionResult<IEnumerable<MembersDTO>>> GetUser()
+        public async Task<ActionResult<IEnumerable<MembersDTO>>> GetUser([FromQuery]UserParams userParams)
         {
-            var user = await userRepository.GetAllMembersAsync();
-            
+        userParams.CurrentUsername = User.GetUsername();
+            var user = await userRepository.GetAllMembersAsync(userParams);
+
+        Response.AddPaginationHeader(user);
 
             return Ok(user);
 
@@ -55,6 +58,7 @@ public class UserController(IUserRepository userRepository, IMapper mapper, IPho
             Url = result.SecureUrl.AbsoluteUri,
             PublicId = result.PublicId
         };
+        if(user.Photos.Count == 0) { photo.IsMain = true; }
         user.Photos.Add(photo);
         if (await userRepository.SaveAllAsync())
             return CreatedAtAction(nameof(GetUser),

@@ -1,6 +1,7 @@
 ﻿using DatingAPI.DTOs;
 using DatingAPI.Entities;
-
+using DatingAPI.Helpers;
+using Microsoft.EntityFrameworkCore;
 namespace DatingAPI.Interface
 {
     public interface IUserRepository
@@ -11,7 +12,7 @@ namespace DatingAPI.Interface
         Task <appUser?> GetUserByIdAsync(int id);
         Task<appUser?> GetUserByNameAsync (string name);
 
-        Task<IEnumerable<MembersDTO>> GetAllMembersAsync ();
+        Task<PagedList<MembersDTO>> GetAllMembersAsync (UserParams userParams);
         Task<MembersDTO?> GetMemberAsync(string username);
     }
 }
