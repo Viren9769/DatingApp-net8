@@ -7,6 +7,7 @@ import { Photo } from '../_models/photo';
 import { PaginatedResult } from '../_models/pagination';
 import { UserParams } from '../_models/userParam';
 import { AccountService } from './account.service';
+import { setpaginatedResponse, setPaginationHeaders } from './paginationHelper';
 
 
 @Injectable({
@@ -30,38 +31,19 @@ export class MembersService {
   getmembers(){
 
     const response = this.memberCache.get(Object.values(this.userParams()).join('-'));
-    if(response) return this.setpaginatedResponse(response);
-    let params = this.setPaginationHeaders(this.userParams().pagNumber, this.userParams().pageSize);
+    if(response) return setpaginatedResponse(response, this.paginatedResult);
+    let params = setPaginationHeaders(this.userParams().pagNumber, this.userParams().pageSize);
     params = params.append('minAge', this.userParams().minAge);
     params = params.append('maxAge', this.userParams().maxAge);
     params = params.append('gender', this.userParams().gender);
     params = params.append('orderBy', this.userParams().orderBy);
     return this.http.get<Member[]>(this.baseUrl + 'user', {observe: 'response', params}).subscribe({
       next: response => {
-       this.setpaginatedResponse(response);
+       setpaginatedResponse(response, this.paginatedResult);
        this.memberCache.set(Object.values(this.userParams()).join('-'),response)
       } 
     })
   }
-
-  private setpaginatedResponse(response: HttpResponse<Member[]>)
-  {
-    this.paginatedResult.set({
-      items: response.body as Member[],
-      pagination: JSON.parse(response.headers.get('Pagination')!)
-    })
-  }
-
-  private setPaginationHeaders(pageNumber: number, pageSize: number){
-    let params = new HttpParams();
-    if(pageNumber && pageSize){
-      params = params.append('pageNumber', pageNumber);
-      params = params.append('pageSize', pageSize);
-    }
-    return params;
-  }
-
-
   getMember(username: string){
     // const member = this.members().find(x => x.username === username);
     // if(member !== undefined) return of(member);
