@@ -12,7 +12,7 @@ namespace DatingAPI.Services
         public string CreateToken(appUser user)
         {
             var tokenKey = config["TokenKey"] ?? throw new Exception( "Cannot access tokenKey from appsetting");
-            if (tokenKey.Length < 64) throw new Exception("Youe tokenkey need to be longer");
+            if (tokenKey.Length < 64) throw new Exception("Your tokenkey need to be longer");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey));
             var claims = new List<Claim>
             {
@@ -26,10 +26,10 @@ namespace DatingAPI.Services
                 Expires = DateTime.UtcNow.AddDays(1),
                 SigningCredentials = creds
             };
-            var tokenaHandler = new JwtSecurityTokenHandler();
-            var token = tokenaHandler.CreateToken(tokenDescripter);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescripter);
 
-            return tokenaHandler.WriteToken(token);
+            return tokenHandler.WriteToken(token);
         }
     }
 }
