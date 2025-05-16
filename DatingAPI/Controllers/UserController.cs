@@ -26,7 +26,7 @@ public class UserController(IUserRepository userRepository, IMapper mapper, IPho
             return Ok(user);
 
         }
-   
+    
     [HttpGet("{username}")]    // api/users/id
         public async Task<ActionResult<MembersDTO>> GetUserById(string username)
         {

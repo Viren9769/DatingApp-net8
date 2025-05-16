@@ -2,41 +2,49 @@
 using System.Text;
 using System.Text.Json;
 using DatingAPI.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatingAPI.Data; // File-scoped namespace (recommended in .NET 6+)
 
 public static class Seed
 {
-    public static async Task Seeduser(DataContext context)
+    public static async Task Seeduser(UserManager<appUser> userManager, RoleManager<AppRole> roleManager)
     {
-        if (await context.Users.AnyAsync()) return;
+        if (await userManager.Users.AnyAsync()) return;
 
         var userdata = await File.ReadAllTextAsync("C:\\Users\\Viren\\Desktop\\Authentication\\DatingAPI\\DatingAPI\\Data\\UserSeedData.json");
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var users = JsonSerializer.Deserialize<List<appUser>>(userdata, options);
         if (users == null) return;
+        var roles = new List<AppRole>
+        {
+            new() {Name ="Member"},
+            new() {Name ="Admin"},
+            new() {Name ="Moderator"},
+        };
+        foreach (var role in roles)
+        {
+            await roleManager.CreateAsync(role);
+        }
 
         foreach (var user in users)
         {
-            using var hmac = new HMACSHA512();
-            user.UserName = user.UserName.ToLower();
-            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes("Pa$$w0rd"));
-            user.PasswordSalt = hmac.Key;
-
-            // Ensure each photo has a proper UserId assigned
-            if (user.Photos != null && user.Photos.Count > 0)
-            {
-                foreach (var photo in user.Photos)
-                {
-                    photo.appUser = user; // Ensure foreign key relationship is established
-                    Console.WriteLine($"Seeding Photo: {photo.Url} for User: {user.UserName}");
-                }
-            }
-
-            context.Users.Add(user);
+            user.UserName = user.UserName!.ToLower(); 
+            await userManager.CreateAsync(user, "Pa$$w0rd");
+            await userManager.AddToRoleAsync(user, "Member");
         }
 
-        await context.SaveChangesAsync(); // Save changes after all users are added
+        var admin = new appUser
+        {
+            UserName = "admin",
+            KnownAs = "Admin",
+            Gender = "",
+            City = "",
+            Country = ""
+        };
+
+        await userManager.CreateAsync(admin, "Pa$$w0rd");
+        await userManager.AddToRolesAsync(admin, ["Admin", "Moderator"]);
     }
 }
